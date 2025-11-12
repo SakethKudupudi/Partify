@@ -1,24 +1,63 @@
+# Dependencies
 node_modules/
-dist/
-.env.local
-.env.local.*.backup
-.DS_Store
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.log
+
+# IDE & Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.cache/
-.parcel-cache
-.turbo/
+.vim/
+.editorconfig
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Testing & Coverage
 coverage/
-build/
-.env
-terraform.tfstate*
-.terraform/
-*.tfplan
+.nyc_output/
+*.test.js.snap
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/*.tfplan
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
 
