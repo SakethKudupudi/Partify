@@ -1,0 +1,331 @@
+UNIFIED FRONTEND PORTAL - SETUP & RUN GUIDE
+
+==========================================
+OVERVIEW
+==========================================
+
+You now have a single unified frontend running on ONE PORT with path-based routing:
+
+✅ Admin Portal:    http://localhost:3000/admin
+✅ Vendor Portal:   http://localhost:3000/vendor
+✅ Customer Portal: http://localhost:3000/ (root)
+
+All in ONE React application on ONE PORT (3000)
+
+==========================================
+URL STRUCTURE
+==========================================
+
+Admin Portal:
+  http://localhost:3000/admin
+  http://localhost:3000/admin/dashboard
+  http://localhost:3000/admin/brands
+  http://localhost:3000/admin/models
+  http://localhost:3000/admin/components
+  http://localhost:3000/admin/vendors
+  http://localhost:3000/admin/requests
+  http://localhost:3000/admin/sales
+  http://localhost:3000/admin/orders
+
+Vendor Portal:
+  http://localhost:3000/vendor
+  http://localhost:3000/vendor/dashboard
+  http://localhost:3000/vendor/inventory
+  http://localhost:3000/vendor/pricing
+  http://localhost:3000/vendor/requests
+  http://localhost:3000/vendor/sales
+  http://localhost:3000/vendor/orders
+
+Customer Portal:
+  http://localhost:3000/ (home)
+  http://localhost:3000/brands
+  http://localhost:3000/cart
+  http://localhost:3000/checkout
+  http://localhost:3000/orders
+  http://localhost:3000/account
+
+Login Page:
+  http://localhost:3000/login
+
+==========================================
+HOW TO RUN
+==========================================
+
+STEP 1: Make sure backend is running
+  cd backend
+  npm run dev
+  (Should be running on http://localhost:8080)
+
+STEP 2: Run unified frontend
+  cd unified-portal
+  npm run dev
+  (Automatically opens http://localhost:3000 in your browser)
+
+STEP 3: Login
+  Go to: http://localhost:3000/login
+
+  Test credentials:
+  - Admin:    admin@partify.com / Admin@123456
+  - Vendor:   vendor@store.com / Vendor@123456
+  - Customer: customer@email.com / Customer@123456
+
+STEP 4: Access portals
+  - Admin:    http://localhost:3000/admin
+  - Vendor:   http://localhost:3000/vendor
+  - Customer: http://localhost:3000/
+
+==========================================
+PROJECT STRUCTURE
+==========================================
+
+unified-portal/
+├── src/
+│   ├── App.jsx                 (Main routing)
+│   ├── main.jsx                (React entry point)
+│   ├── pages/
+│   │   ├── Login.jsx           (Login page)
+│   │   ├── admin/              (Admin pages)
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── brands/
+│   │   │   ├── models/
+│   │   │   ├── components/
+│   │   │   ├── vendors/
+│   │   │   ├── sales/
+│   │   │   └── orders/
+│   │   ├── vendor/             (Vendor pages)
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── inventory/
+│   │   │   ├── pricing/
+│   │   │   ├── requests/
+│   │   │   ├── sales/
+│   │   │   └── orders/
+│   │   └── customer/           (Customer pages)
+│   │       ├── HomePage.jsx
+│   │       ├── brands/
+│   │       ├── shopping/
+│   │       ├── orders/
+│   │       └── account/
+│   ├── components/
+│   │   ├── Navigation.jsx      (Shared navbar)
+│   │   └── Footer.jsx          (Shared footer)
+│   └── styles/
+│       └── apple.css           (Apple design system)
+├── index.html                  (HTML entry)
+├── vite.config.js              (Vite config)
+├── package.json                (Dependencies)
+└── node_modules/               (Installed packages)
+
+==========================================
+FEATURES
+==========================================
+
+✅ Single port (3000)
+✅ Path-based routing (/admin, /vendor, /)
+✅ Role-based access control
+✅ Automatic redirection based on user role
+✅ Shared navigation bar
+✅ Shared footer
+✅ Apple-style UI (already configured)
+✅ Protected routes (login required)
+✅ Logout functionality
+✅ User info in navbar
+✅ All portals fully functional
+
+==========================================
+AUTHENTICATION FLOW
+==========================================
+
+1. User goes to http://localhost:3000/login
+2. Selects role (Admin, Vendor, or Customer)
+3. Enters email and password
+4. Clicks "Sign In"
+5. Backend validates credentials against Supabase
+6. Token stored in localStorage
+7. User redirected to appropriate portal:
+   - Admin → /admin
+   - Vendor → /vendor
+   - Customer → /
+8. Navigation shows user name
+9. User can click "Logout" to return to login
+
+==========================================
+ROUTING LOGIC
+==========================================
+
+Root Routes:
+- /login                 → Login page (public)
+- /admin/*               → Admin portal (admin only)
+- /vendor/*              → Vendor portal (vendor only)
+- /*                     → Customer portal (public + protected routes)
+
+Admin Subroutes:
+- /admin                 → Dashboard
+- /admin/brands          → Brand management
+- /admin/models          → Model management
+- /admin/components      → Component management
+- /admin/vendors         → Vendor list
+- /admin/requests        → Vendor requests
+- /admin/sales           → Sales dashboard
+- /admin/orders          → Orders
+
+Vendor Subroutes:
+- /vendor                → Dashboard
+- /vendor/inventory      → Inventory management
+- /vendor/pricing        → Pricing management
+- /vendor/requests       → Request tracking
+- /vendor/sales          → Sales dashboard
+- /vendor/orders         → Orders
+
+Customer Subroutes:
+- /                      → Home page
+- /brands                → Browse brands
+- /cart                  → Shopping cart (protected)
+- /checkout              → Checkout (protected)
+- /orders                → Order history (protected)
+- /account               → Account settings (protected)
+
+==========================================
+ENVIRONMENT CONFIGURATION
+==========================================
+
+Unified portal automatically uses:
+- Backend API: http://localhost:8080
+- Login endpoint: /api/auth/login
+- Token: Stored in localStorage
+- User data: Stored in localStorage
+
+Make sure backend is running on port 8080!
+
+==========================================
+NAVIGATION FEATURES
+==========================================
+
+✅ Sticky navbar at top
+✅ Shows current user name
+✅ Shows current role (Admin/Vendor/Customer)
+✅ Active link highlighting
+✅ Logout button
+✅ Responsive mobile menu (future)
+✅ Logo with role indicator
+
+Navigation links change based on role:
+
+Admin sees:   Dashboard, Brands, Models, Components, Vendors, Requests, Sales, Orders
+Vendor sees:  Dashboard, Inventory, Pricing, Requests, Sales, Orders
+Customer sees: Home, Brands, Support
+
+==========================================
+STYLING
+==========================================
+
+✅ Apple CSS already included
+✅ Modern design system
+✅ Responsive layout
+✅ Professional colors
+✅ Smooth animations
+✅ Touch-friendly buttons
+✅ Mobile-first design
+
+All pages inherit apple.css styling
+
+==========================================
+QUICK COMMANDS
+==========================================
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm build
+
+# Preview production build
+npm preview
+
+# Lint code
+npm lint
+
+==========================================
+TROUBLESHOOTING
+==========================================
+
+ERROR: Port 3000 already in use
+→ Kill the process: lsof -i :3000 | grep LISTEN | awk '{print $2}' | xargs kill -9
+
+ERROR: Login fails
+→ Make sure backend is running on port 8080
+→ Check .env.local has correct Supabase credentials
+→ Check credentials exist (create test accounts)
+
+ERROR: Cannot find modules
+→ Run: npm install
+→ Make sure you're in unified-portal directory
+
+ERROR: Blank page
+→ Check browser console for errors (F12)
+→ Make sure login was successful
+→ Check localStorage for token
+
+ERROR: "Role not found"
+→ Make sure user role is correctly set in database
+→ Check database schema is executed
+
+==========================================
+PRODUCTION BUILD
+==========================================
+
+To build for production:
+  npm run build
+
+This creates a "dist" folder with optimized files ready for deployment.
+
+You can then serve it with any static server:
+  npx serve dist
+
+==========================================
+NEXT STEPS
+==========================================
+
+1. ✅ Start backend:      cd backend && npm run dev
+2. ✅ Start unified portal: cd unified-portal && npm run dev
+3. ✅ Go to login:        http://localhost:3000/login
+4. ✅ Login with test account
+5. ✅ Access portals:
+   - Admin:    /admin
+   - Vendor:   /vendor
+   - Customer: /
+
+==========================================
+IMPORTANT NOTES
+==========================================
+
+✓ All three portals run from ONE repository
+✓ One port (3000) - no need for multiple ports
+✓ Automatic role-based redirection
+✓ Shared styling (Apple CSS)
+✓ Protected routes require login
+✓ Token stored in localStorage
+✓ User info in navbar
+✓ Single logout button
+✓ Clean URL paths
+
+==========================================
+SUCCESS!
+==========================================
+
+Your unified frontend is ready!
+
+All three portals (Admin, Vendor, Customer) are now accessible
+from a single port with clean path-based URLs:
+
+http://localhost:3000/admin    → Admin Portal
+http://localhost:3000/vendor   → Vendor Portal
+http://localhost:3000/         → Customer Portal
+http://localhost:3000/login    → Login Page
+
+Everything is in ONE application, ONE port, ONE place!
+
+Ready to go! 🚀
+

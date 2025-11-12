@@ -1,0 +1,13 @@
+subscription_id = "your_subscription_id"
+client_id       = "your_client_id"
+client_secret   = "your_client_secret"
+tenant_id       = "your_tenant_id"
+environment     = "prod"
+location        = "eastus"
+storage_account_tier             = "Standard"
+storage_account_replication_type = "LRS"
+redis_sku_name                   = "Basic"
+redis_family                     = "C"
+redis_capacity                   = 0
+app_service_sku                  = "B1"
+

@@ -1,0 +1,70 @@
+✅ AUTHENTICATION SETUP CHECKLIST
+════════════════════════════════════════════════════════════════
+BEFORE YOU START:
+☐ Backend is running: cd backend && npm run dev
+☐ Unified portal is running: cd unified-portal && npm run dev
+☐ Have Supabase dashboard open in browser
+════════════════════════════════════════════════════════════════
+STEP 1: DELETE OLD USERS FROM DATABASE
+☐ Go to: https://app.supabase.com
+☐ Select project: lrvpokxcbnrxohwqnnmz
+☐ Click: SQL Editor → New Query
+☐ Paste this SQL:
+DELETE FROM users WHERE email IN ('admin@partify.com', 'vendor@store.com', 'customer@email.com');
+SELECT COUNT(*) FROM users;
+☐ Click: RUN
+☐ Result shows: 0 (users deleted)
+════════════════════════════════════════════════════════════════
+STEP 2: CREATE USERS VIA SCRIPT
+☐ Ensure backend is running on http://localhost:8080
+☐ Open new terminal window (Terminal 2)
+☐ Run command:
+cd /Users/saketh/project_codes/pilot_project/partify
+node create-auth-users.js
+☐ Watch for output showing 3 users created
+☐ Script prints test credentials
+════════════════════════════════════════════════════════════════
+STEP 3: VERIFY USERS IN SUPABASE
+☐ Supabase Dashboard → Authentication → Users
+☐ Should see 3 users:
+   ☐ admin@partify.com
+   ☐ vendor@store.com
+   ☐ customer@email.com
+════════════════════════════════════════════════════════════════
+STEP 4: TEST LOGIN
+☐ Go to: http://localhost:3000/login
+☐ Test Admin Login:
+   Email: admin@partify.com
+   Password: Admin@123456
+   Role: admin
+   ☐ Click Sign In
+   ☐ Redirected to /admin ✓
+☐ Test Vendor Login:
+   Email: vendor@store.com
+   Password: Vendor@123456
+   Role: vendor
+   ☐ Click Sign In
+   ☐ Redirected to /vendor ✓
+☐ Test Customer Login:
+   Email: customer@email.com
+   Password: Customer@123456
+   Role: customer
+   ☐ Click Sign In
+   ☐ Redirected to / ✓
+════════════════════════════════════════════════════════════════
+STEP 5: VERIFY FEATURES WORK
+☐ User name shows in navbar
+☐ Logout button works
+☐ Can logout and login again
+☐ Each role sees correct navigation
+☐ Protected routes require login
+════════════════════════════════════════════════════════════════
+✅ ALL COMPLETE!
+You now have:
+✓ Users in Supabase Auth
+✓ Users in database
+✓ Working login
+✓ Access to all portals
+✓ Full authentication system
+Ready to use Partify! 🎉
+════════════════════════════════════════════════════════════════

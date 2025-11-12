@@ -1,0 +1,190 @@
+SUPABASE AUTHENTICATION - SETUP USERS PROPERLY
+
+==========================================
+PROBLEM: Users in Database but Not in Auth
+==========================================
+
+You have users in the "users" table, but NOT in Supabase Authentication.
+We need to create them in BOTH places.
+
+==========================================
+STEP 1: CLEAN UP EXISTING USERS (Important!)
+==========================================
+
+Go to Supabase Dashboard:
+1. URL: https://app.supabase.com
+2. Select project: lrvpokxcbnrxohwqnnmz
+3. Click: SQL Editor
+4. Click: New Query
+5. Paste this SQL:
+
+DELETE FROM users WHERE email IN ('admin@partify.com', 'vendor@store.com', 'customer@email.com');
+
+6. Click: RUN
+7. Verify count is 0:
+
+SELECT COUNT(*) FROM users;
+
+==========================================
+STEP 2: RUN THE CREATION SCRIPT
+==========================================
+
+This script will create users PROPERLY in both Auth and Database.
+
+File: /create-auth-users.js
+
+Terminal 1: Start Backend (if not already running)
+  cd backend
+  npm run dev
+
+Terminal 2: Create Users
+  node create-auth-users.js
+
+Expected Output:
+  ✅ Backend is running
+  📝 Creating admin user: admin@partify.com
+  ✅ Successfully created: admin@partify.com
+  📝 Creating vendor user: vendor@store.com
+  ✅ Successfully created: vendor@store.com
+  📝 Creating customer user: customer@email.com
+  ✅ Successfully created: customer@email.com
+
+  📋 TEST CREDENTIALS:
+  ADMIN: admin@partify.com / Admin@123456 → /admin
+  VENDOR: vendor@store.com / Vendor@123456 → /vendor
+  CUSTOMER: customer@email.com / Customer@123456 → /
+
+==========================================
+STEP 3: VERIFY IN SUPABASE
+==========================================
+
+Go to Supabase Dashboard:
+1. Click: Authentication (left sidebar)
+2. Click: Users tab
+3. You should see 3 users:
+   - admin@partify.com
+   - vendor@store.com
+   - customer@email.com
+
+Also verify in Database:
+1. Click: Table Editor
+2. Select: users table
+3. Should show 3 rows with all user data
+
+==========================================
+STEP 4: LOGIN AND TEST
+==========================================
+
+Go to: http://localhost:3000/login
+
+Test Admin Login:
+  Email: admin@partify.com
+  Password: Admin@123456
+  Role: admin
+  Click: Sign In
+  Result: Redirected to /admin ✅
+
+Test Vendor Login:
+  Email: vendor@store.com
+  Password: Vendor@123456
+  Role: vendor
+  Click: Sign In
+  Result: Redirected to /vendor ✅
+
+Test Customer Login:
+  Email: customer@email.com
+  Password: Customer@123456
+  Role: customer
+  Click: Sign In
+  Result: Redirected to / (home) ✅
+
+==========================================
+WHAT THE SCRIPT DOES
+==========================================
+
+The create-auth-users.js script:
+
+1. Checks backend is running
+2. For each user:
+   - Creates auth user in Supabase (email/password)
+   - Creates profile in users table (id matches auth)
+   - If vendor: creates vendor profile
+3. Shows test credentials
+4. Confirms all users created
+
+This ensures users are in BOTH:
+- Supabase Auth (for login)
+- Users Table (for profile data)
+
+With matching IDs so they work together!
+
+==========================================
+TROUBLESHOOTING
+==========================================
+
+❌ "Backend is not running"
+✅ Terminal 1: cd backend && npm run dev
+
+❌ "Users already exist in database"
+✅ Run SQL in step 1 to delete them first
+
+❌ "User already exists error"
+✅ Make sure you deleted them from database first
+
+❌ "Cannot find module"
+✅ Run: npm install
+✅ Make sure you're in project root
+
+❌ Login still fails
+✅ Check Supabase Dashboard Auth tab - users should be there
+✅ Check users table has all 3 users
+✅ Check IDs match between Auth and table
+
+==========================================
+VERIFY EVERYTHING WORKS
+==========================================
+
+After running script and login:
+
+1. ✅ Users appear in Supabase Auth tab
+2. ✅ Users appear in users table
+3. ✅ Can login with each user
+4. ✅ Auto-redirects to correct portal
+5. ✅ Navigation shows user name
+6. ✅ Logout works
+7. ✅ Can login with different user
+
+If all ✅, you're ready to use the platform!
+
+==========================================
+QUICK REFERENCE
+==========================================
+
+Commands:
+  node create-auth-users.js          # Create users
+  curl http://localhost:8080/health  # Check backend
+
+URLs:
+  Login: http://localhost:3000/login
+  Admin: http://localhost:3000/admin
+  Vendor: http://localhost:3000/vendor
+  Customer: http://localhost:3000/
+
+Credentials:
+  Admin: admin@partify.com / Admin@123456
+  Vendor: vendor@store.com / Vendor@123456
+  Customer: customer@email.com / Customer@123456
+
+==========================================
+SUMMARY
+==========================================
+
+1. Delete old users from database (SQL)
+2. Run: node create-auth-users.js
+3. Users created in Auth + Database
+4. Go to: http://localhost:3000/login
+5. Login with test credentials
+6. Access your portal ✅
+
+That's it! Users properly authenticated! 🎉
+
