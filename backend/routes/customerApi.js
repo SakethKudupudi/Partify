@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { verifyToken } from '../../middleware/auth.js';
-import { getRedis } from '../../config/redis.js';
+import { verifyToken } from '../middleware/auth.js';
+import { getRedis } from '../config/redis.js';
 import { getSupabase } from '../config/supabase.js';
 
 const router = Router();

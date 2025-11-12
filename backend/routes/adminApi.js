@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { verifyToken, verifyAdmin } from '../../middleware/auth.js';
+import { verifyToken, verifyAdmin } from '../middleware/auth.js';
 import { getSupabase } from '../config/supabase.js';
 import { uploadToAzure } from '../config/azure.js';
 
