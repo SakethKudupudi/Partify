@@ -47,7 +47,25 @@ export async function verifyVendor(req, res, next) {
   if (req.user?.role !== 'vendor') {
     return res.status(403).json({ error: 'Vendor access required' });
   }
-  next();
+
+  // Fetch vendor_id from vendors table
+  try {
+    const supabase = getSupabase();
+    const { data: vendor, error } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (error || !vendor) {
+      return res.status(403).json({ error: 'Vendor profile not found' });
+    }
+
+    req.user.vendor_id = vendor.id;
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to verify vendor' });
+  }
 }
 
 export async function verifyCustomer(req, res, next) {
