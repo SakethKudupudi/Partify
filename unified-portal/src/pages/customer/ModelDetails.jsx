@@ -73,7 +73,7 @@ export default function ModelDetails() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/cart', {
+      const response = await fetch('http://localhost:8080/api/cart/add', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -410,11 +410,39 @@ export default function ModelDetails() {
 
                   {component.vendors && component.vendors.length > 0 && (
                     <button
-                      className="btn btn-primary"
-                      style={{ width: '100%', marginTop: '12px' }}
+                      className="btn"
+                      style={{
+                        width: '100%',
+                        marginTop: '12px',
+                        backgroundColor: '#0071e3',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0, 113, 227, 0.2)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0077ED';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 113, 227, 0.3)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0071e3';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.2)';
+                      }}
                       onClick={() => addToCart(component)}
                     >
-                      Add to Cart
+                      <span style={{ fontSize: '18px' }}>🛒</span>
+                      <span>Add to Cart</span>
                     </button>
                   )}
                 </div>

@@ -58,15 +58,18 @@ router.get('/models/:id/components', async (req, res) => {
       modelComponents.map(async (mc) => {
         const { data: inventory } = await supabase
           .from('vendor_inventory')
-          .select('*, vendors(store_name, email)')
+          .select('*, vendors(store_name, email, is_active)')
           .eq('phone_model_id', req.params.id)
           .eq('component_id', mc.component_id)
           .eq('status', 'approved')
           .gt('quantity', 0);
         
+        // Filter to only show inventory from active vendors
+        const activeVendorInventory = (inventory || []).filter(item => item.vendors?.is_active !== false);
+        
         return {
           ...mc.components,
-          vendors: inventory || []
+          vendors: activeVendorInventory
         };
       })
     );
@@ -99,12 +102,14 @@ router.get('/components/:id/vendors', async (req, res) => {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('vendor_inventory')
-      .select('*, vendors(store_name)')
+      .select('*, vendors(store_name, is_active)')
       .eq('component_id', req.params.id)
       .eq('status', 'approved');
 
     if (error) throw error;
-    res.json(data);
+    // Filter to only show inventory from active vendors
+    const activeVendorInventory = (data || []).filter(item => item.vendors?.is_active !== false);
+    res.json(activeVendorInventory);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -195,6 +200,7 @@ router.post('/cart/add', verifyToken, async (req, res) => {
     } else {
       items.push({
         inventory_id,
+        vendor_id: inventory.vendor_id,
         quantity,
         price: inventory.proposed_price,
         name: inventory.name || 'Component'
@@ -282,15 +288,23 @@ router.post('/orders', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
-    // Calculate total
-    const total_amount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Calculate total and total items
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total_items = items.reduce((sum, item) => sum + item.quantity, 0);
+    const total_amount = subtotal; // For now, subtotal = total_amount (no tax/shipping added yet)
+
+    // Generate order number
+    const order_number = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
     // Create order
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert([{
         customer_id: req.user.id,
+        order_number,
         total_amount,
+        subtotal,
+        total_items,
         status: 'confirmed',
         shipping_address
       }])
@@ -299,18 +313,43 @@ router.post('/orders', verifyToken, async (req, res) => {
     if (orderError) throw orderError;
 
     // Create order items
-    const orderItems = items.map(item => ({
+    let orderItems = items.map(item => ({
       order_id: order[0].id,
-      vendor_inventory_id: item.inventory_id,
+      inventory_id: item.inventory_id,
+      vendor_id: item.vendor_id,
       quantity: item.quantity,
       price: item.price
     }));
 
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems);
+    // Verify and fetch vendor_id for any items that don't have it
+    const itemsWithoutVendor = orderItems.filter(item => !item.vendor_id);
+    if (itemsWithoutVendor.length > 0) {
+      for (let i = 0; i < orderItems.length; i++) {
+        if (!orderItems[i].vendor_id) {
+          const { data: inv } = await supabase
+            .from('vendor_inventory')
+            .select('vendor_id')
+            .eq('id', orderItems[i].inventory_id)
+            .single();
+          if (inv) {
+            orderItems[i].vendor_id = inv.vendor_id;
+          }
+        }
+      }
+    }
 
-    if (itemsError) throw itemsError;
+    console.log('Inserting order items:', orderItems);
+    const { data: insertedItems, error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems)
+      .select();
+
+    if (itemsError) {
+      console.error('Error inserting order items:', itemsError);
+      throw itemsError;
+    }
+
+    console.log('Order items inserted successfully:', insertedItems);
 
     // Clear cart
     await redis.del(cartKey);
@@ -318,7 +357,9 @@ router.post('/orders', verifyToken, async (req, res) => {
     res.status(201).json({
       message: 'Order created',
       order_id: order[0].id,
-      total_amount
+      order_number,
+      total_amount,
+      items_count: insertedItems?.length || 0
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -343,16 +384,37 @@ router.get('/orders', verifyToken, async (req, res) => {
 router.get('/orders/:id', verifyToken, async (req, res) => {
   try {
     const supabase = getSupabase();
-    const { data, error } = await supabase
+    const { data: orderData, error: orderError } = await supabase
       .from('orders')
-      .select('*, order_items(*, vendor_inventory(*))')
+      .select('*')
       .eq('id', req.params.id)
       .single();
 
-    if (error) throw error;
-    res.json(data);
+    if (orderError) throw orderError;
+
+    console.log('Order found:', orderData.id);
+
+    // Fetch order items separately with vendor_inventory and components
+    const { data: itemsData, error: itemsError } = await supabase
+      .from('order_items')
+      .select('*, vendor_inventory(*, components(*))')
+      .eq('order_id', req.params.id);
+
+    console.log(`Order items fetched: ${itemsData?.length || 0} items`);
+    
+    if (itemsError) throw itemsError;
+
+    // Combine order data with items
+    const orderWithItems = {
+      ...orderData,
+      order_items: itemsData || []
+    };
+
+    console.log('Returning order with items:', JSON.stringify(orderWithItems, null, 2));
+    res.json(orderWithItems);
   } catch (error) {
-    res.status(404).json({ error: 'Order not found' });
+    console.error('Error fetching order:', error);
+    res.status(404).json({ error: 'Order not found', details: error.message });
   }
 });
 
@@ -408,14 +470,16 @@ router.get('/models/:id', async (req, res) => {
 
     if (error) throw error;
 
-    // Get available components count
+    // Get available components count - only from active vendors
     const { data: components } = await supabase
       .from('vendor_inventory')
-      .select('component_id')
+      .select('component_id, vendors(is_active)')
       .eq('phone_model_id', req.params.id)
       .eq('status', 'approved');
 
-    const uniqueComponents = new Set(components?.map(c => c.component_id));
+    // Filter to only active vendors
+    const activeComponents = (components || []).filter(c => c.vendors?.is_active !== false);
+    const uniqueComponents = new Set(activeComponents.map(c => c.component_id));
 
     res.json({ ...data, available_components: uniqueComponents.size });
   } catch (error) {

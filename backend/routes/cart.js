@@ -57,7 +57,7 @@ router.post('/add', verifyToken, async (req, res) => {
   const supabase = getSupabase();
   const { data: inventoryItem } = await supabase
     .from('vendor_inventory')
-    .select('proposed_price, quantity')
+    .select('vendor_id, proposed_price, quantity')
     .eq('id', inventory_id)
     .eq('status', 'approved')
     .single();
@@ -83,6 +83,7 @@ router.post('/add', verifyToken, async (req, res) => {
     items.push({
       id: uuidv4(),
       inventory_id,
+      vendor_id: inventoryItem.vendor_id,
       quantity,
       price: inventoryItem.proposed_price,
       added_at: new Date().toISOString()

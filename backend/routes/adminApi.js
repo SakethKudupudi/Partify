@@ -556,11 +556,13 @@ router.get('/vendors/requests', verifyToken, verifyAdmin, async (req, res) => {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('vendor_inventory')
-      .select('*, vendors(store_name), phone_models(name), components(name)')
+      .select('*, vendors(store_name, is_active), phone_models(name), components(name)')
       .eq('status', 'pending_approval');
 
     if (error) throw error;
-    res.json(data);
+    // Filter out requests from deactivated vendors
+    const filteredData = data.filter(item => item.vendors?.is_active !== false);
+    res.json(filteredData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -768,11 +770,13 @@ router.get('/vendors/requests/pending', verifyToken, verifyAdmin, async (req, re
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('vendor_inventory')
-      .select('*, vendors(store_name), phone_models(name), components(name)')
+      .select('*, vendors(store_name, is_active), phone_models(name), components(name)')
       .eq('status', 'pending_approval');
 
     if (error) throw error;
-    res.json(data);
+    // Filter out requests from deactivated vendors
+    const filteredData = data.filter(item => item.vendors?.is_active !== false);
+    res.json(filteredData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -783,11 +787,13 @@ router.get('/vendors/requests/approved', verifyToken, verifyAdmin, async (req, r
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('vendor_inventory')
-      .select('*, vendors(store_name), phone_models(name), components(name)')
+      .select('*, vendors(store_name, is_active), phone_models(name), components(name)')
       .eq('status', 'approved');
 
     if (error) throw error;
-    res.json(data);
+    // Filter out requests from deactivated vendors
+    const filteredData = data.filter(item => item.vendors?.is_active !== false);
+    res.json(filteredData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -798,11 +804,13 @@ router.get('/vendors/requests/rejected', verifyToken, verifyAdmin, async (req, r
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('vendor_inventory')
-      .select('*, vendors(store_name), phone_models(name), components(name), rejection_reason')
+      .select('*, vendors(store_name, is_active), phone_models(name), components(name), rejection_reason')
       .eq('status', 'rejected');
 
     if (error) throw error;
-    res.json(data);
+    // Filter out requests from deactivated vendors
+    const filteredData = data.filter(item => item.vendors?.is_active !== false);
+    res.json(filteredData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1180,6 +1188,52 @@ router.get('/orders', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+// Specific routes BEFORE parameterized routes
+router.get('/orders/pending', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*, users(email, name), order_items(*, vendor_inventory(components(name)))')
+      .eq('status', 'confirmed')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update order status
+router.put('/orders/:id', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id)
+      .select();
+
+    if (error) throw error;
+
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ message: 'Order updated', data: data[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get order by ID
 router.get('/orders/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const supabase = getSupabase();
@@ -1193,22 +1247,6 @@ router.get('/orders/:id', verifyToken, verifyAdmin, async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(404).json({ error: 'Order not found' });
-  }
-});
-
-router.get('/orders/pending', verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*, users(email, name)')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 

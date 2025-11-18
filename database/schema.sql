@@ -104,6 +104,9 @@ CREATE TABLE vendor_inventory (
 CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   customer_id UUID NOT NULL,
+  order_number VARCHAR(50) NOT NULL UNIQUE,
+  total_items INTEGER NOT NULL,
+  subtotal DECIMAL(12, 2) NOT NULL,
   total_amount DECIMAL(12, 2) NOT NULL,
   status VARCHAR(50) NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   shipping_address TEXT NOT NULL,
@@ -125,7 +128,7 @@ CREATE TABLE order_items (
   created_at TIMESTAMP DEFAULT NOW(),
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
   FOREIGN KEY (inventory_id) REFERENCES vendor_inventory(id) ON DELETE CASCADE,
-  FOREIGN KEY (vendor_id) REFERENCES vendors(user_id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
 );
 
 -- Create indexes for better performance
@@ -175,4 +178,21 @@ CREATE POLICY "Customers can view their own orders"
 CREATE POLICY "Customers can create orders"
   ON orders FOR INSERT
   WITH CHECK (customer_id = auth.uid());
+
+-- RLS Policies for order_items
+CREATE POLICY "Customers can view their order items"
+  ON order_items FOR SELECT
+  USING (
+    order_id IN (
+      SELECT id FROM orders WHERE customer_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Customers can create order items"
+  ON order_items FOR INSERT
+  WITH CHECK (
+    order_id IN (
+      SELECT id FROM orders WHERE customer_id = auth.uid()
+    )
+  );
 
