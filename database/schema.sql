@@ -93,7 +93,7 @@ CREATE TABLE vendor_inventory (
   rejection_reason TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  FOREIGN KEY (vendor_id) REFERENCES vendors(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
   FOREIGN KEY (phone_model_id) REFERENCES phone_models(id) ON DELETE CASCADE,
   FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE,
   FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,

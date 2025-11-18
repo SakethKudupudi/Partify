@@ -461,6 +461,24 @@ router.get('/vendors/:id', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+router.put('/vendors/:id', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    const { is_active } = req.body;
+
+    const { data, error } = await supabase
+      .from('vendors')
+      .update({ is_active })
+      .eq('id', req.params.id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Sales & Analytics
 router.get('/sales/overview', verifyToken, verifyAdmin, async (req, res) => {
   try {

@@ -9,7 +9,7 @@ export default function VendorRequests() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const API_URL = 'http://localhost:8080/api';
+  const API_URL = 'http://localhost:8080/api/admin';
 
   useEffect(() => {
     fetchRequests();
@@ -19,17 +19,23 @@ export default function VendorRequests() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const url = filterStatus 
-        ? `${API_URL}/vendor-requests?status=${filterStatus}`
-        : `${API_URL}/vendor-requests`;
+      const endpoint = filterStatus === 'pending_approval' 
+        ? '/vendors/requests/pending'
+        : filterStatus === 'approved'
+        ? '/vendors/requests/approved'
+        : filterStatus === 'rejected'
+        ? '/vendors/requests/rejected'
+        : '/vendors/requests';
       
-      const response = await fetch(url, {
+      const response = await fetch(`${API_URL}${endpoint}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.ok) {
         const data = await response.json();
         setRequests(data);
+      } else {
+        toast.error('Failed to fetch requests');
       }
     } catch (error) {
       toast.error('Error fetching requests');
@@ -43,8 +49,8 @@ export default function VendorRequests() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/vendor-requests/${requestId}/approve`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/vendors/requests/${requestId}/approve`, {
+        method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -65,8 +71,8 @@ export default function VendorRequests() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/vendor-requests/${selectedRequest.id}/reject`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/vendors/requests/${selectedRequest.id}/reject`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

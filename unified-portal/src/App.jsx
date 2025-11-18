@@ -108,7 +108,11 @@ export default function App() {
                   <Route path="vendors/:id/suspend" element={<AdminVendors />} />
                   <Route path="vendors/performance" element={<AdminVendors />} />
                   
-                  {/* Vendor Requests */}
+                  {/* Vendor Requests - both paths for convenience */}
+                  <Route path="requests" element={<AdminVendorRequests />} />
+                  <Route path="requests/pending" element={<AdminVendorRequests />} />
+                  <Route path="requests/approved" element={<AdminVendorRequests />} />
+                  <Route path="requests/rejected" element={<AdminVendorRequests />} />
                   <Route path="vendors/requests" element={<AdminVendorRequests />} />
                   <Route path="vendors/requests/pending" element={<AdminVendorRequests />} />
                   <Route path="vendors/requests/approved" element={<AdminVendorRequests />} />
