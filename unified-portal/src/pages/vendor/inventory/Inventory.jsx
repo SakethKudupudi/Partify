@@ -63,34 +63,29 @@ export default function VendorInventory() {
 
   const fetchBrands = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/admin/brands', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetch('http://localhost:8080/api/customer/brands');
 
       if (response.ok) {
         const data = await response.json();
         setBrands(data);
       }
     } catch (error) {
-      console.error('Error fetching brands');
+      console.error('Error fetching brands:', error);
+      toast.error('Error loading brands');
     }
   };
 
   const fetchModels = async (brandId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/admin/models', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetch(`http://localhost:8080/api/customer/brands/${brandId}/models`);
 
       if (response.ok) {
         const data = await response.json();
-        const filteredModels = data.filter(model => model.brand_id === brandId);
-        setModels(filteredModels);
+        setModels(data);
       }
     } catch (error) {
-      console.error('Error fetching models');
+      console.error('Error fetching models:', error);
+      toast.error('Error loading models');
     }
   };
 
