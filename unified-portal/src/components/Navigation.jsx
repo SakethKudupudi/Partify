@@ -38,7 +38,9 @@ export default function Navigation({ role = 'customer' }) {
         return [
           { label: 'Home', path: '/' },
           { label: 'Brands', path: '/brands' },
-          { label: 'Support', path: '/support' },
+          { label: 'Cart', path: '/cart' },
+          { label: 'Orders', path: '/orders' },
+          { label: 'Account', path: '/account' },
         ];
     }
   };

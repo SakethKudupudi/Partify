@@ -8,6 +8,8 @@ export default function ModelDetails() {
   const [model, setModel] = useState(null);
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [quantities, setQuantities] = useState({}); // Track quantity for each component
+  const [selectedVendors, setSelectedVendors] = useState({}); // Track selected vendor for each component
 
   const API_URL = 'http://localhost:8080/api/customer';
 
@@ -50,6 +52,52 @@ export default function ModelDetails() {
     acc[category].push(component);
     return acc;
   }, {});
+
+  const handleQuantityChange = (componentId, value) => {
+    const qty = Math.max(1, parseInt(value) || 1);
+    setQuantities(prev => ({ ...prev, [componentId]: qty }));
+  };
+
+  const handleVendorSelect = (componentId, vendorInventoryId) => {
+    setSelectedVendors(prev => ({ ...prev, [componentId]: vendorInventoryId }));
+  };
+
+  const addToCart = async (component) => {
+    const quantity = quantities[component.component_id] || 1;
+    const vendorInventoryId = selectedVendors[component.component_id] || component.vendors[0]?.id;
+
+    if (!vendorInventoryId) {
+      toast.error('Please select a vendor');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/cart', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          inventory_id: vendorInventoryId,
+          quantity: quantity
+        })
+      });
+
+      if (response.ok) {
+        toast.success(`Added ${quantity} ${component.name}(s) to cart!`);
+        // Reset quantity after adding
+        setQuantities(prev => ({ ...prev, [component.component_id]: 1 }));
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to add to cart');
+      }
+    } catch (error) {
+      toast.error('Error adding to cart');
+      console.error(error);
+    }
+  };
 
   if (loading) {
     return (
@@ -260,41 +308,88 @@ export default function ModelDetails() {
                         color: '#666',
                         marginBottom: '8px'
                       }}>
-                        Available from {component.vendors.length} vendor{component.vendors.length > 1 ? 's' : ''}:
+                        Select Vendor:
                       </p>
-                      {component.vendors.slice(0, 3).map((vendor, idx) => (
-                        <div
-                          key={vendor.id}
-                          style={{
-                            padding: '8px 12px',
-                            backgroundColor: '#f9f9f9',
-                            borderRadius: '6px',
-                            marginBottom: '6px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <div>
-                            <p style={{ fontSize: '13px', fontWeight: '500', marginBottom: '2px' }}>
-                              {vendor.vendors?.store_name || 'Vendor'}
-                            </p>
-                            <p style={{ fontSize: '11px', color: '#666' }}>
-                              {vendor.quantity} in stock
-                            </p>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <p style={{ fontSize: '16px', fontWeight: '600', color: '#0066cc' }}>
-                              ${parseFloat(vendor.proposed_price).toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {component.vendors.length > 3 && (
-                        <p style={{ fontSize: '11px', color: '#666', marginTop: '8px' }}>
-                          +{component.vendors.length - 3} more vendor{component.vendors.length - 3 > 1 ? 's' : ''}
+                      <select
+                        value={selectedVendors[component.component_id] || component.vendors[0]?.id || ''}
+                        onChange={(e) => handleVendorSelect(component.component_id, e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          borderRadius: '6px',
+                          border: '1px solid #ddd',
+                          fontSize: '14px',
+                          marginBottom: '12px'
+                        }}
+                      >
+                        {component.vendors.map((vendor) => (
+                          <option key={vendor.id} value={vendor.id}>
+                            {vendor.vendors?.store_name || 'Vendor'} - ${parseFloat(vendor.proposed_price).toFixed(2)} ({vendor.quantity} in stock)
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Quantity Selector */}
+                      <div style={{ marginBottom: '12px' }}>
+                        <p style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: '#666',
+                          marginBottom: '8px'
+                        }}>
+                          Quantity:
                         </p>
-                      )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <button
+                            onClick={() => handleQuantityChange(component.component_id, (quantities[component.component_id] || 1) - 1)}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '6px',
+                              border: '1px solid #ddd',
+                              backgroundColor: 'white',
+                              cursor: 'pointer',
+                              fontSize: '18px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={quantities[component.component_id] || 1}
+                            onChange={(e) => handleQuantityChange(component.component_id, e.target.value)}
+                            style={{
+                              width: '60px',
+                              padding: '8px',
+                              borderRadius: '6px',
+                              border: '1px solid #ddd',
+                              textAlign: 'center',
+                              fontSize: '14px'
+                            }}
+                          />
+                          <button
+                            onClick={() => handleQuantityChange(component.component_id, (quantities[component.component_id] || 1) + 1)}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '6px',
+                              border: '1px solid #ddd',
+                              backgroundColor: 'white',
+                              cursor: 'pointer',
+                              fontSize: '18px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div style={{
@@ -317,12 +412,9 @@ export default function ModelDetails() {
                     <button
                       className="btn btn-primary"
                       style={{ width: '100%', marginTop: '12px' }}
-                      onClick={() => {
-                        // Add to cart functionality
-                        toast.success('Component added to cart!');
-                      }}
+                      onClick={() => addToCart(component)}
                     >
-                      View Vendors & Add to Cart
+                      Add to Cart
                     </button>
                   )}
                 </div>
