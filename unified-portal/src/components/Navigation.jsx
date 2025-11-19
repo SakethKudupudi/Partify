@@ -1,35 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navigation({ role = 'customer' }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    if (role === 'customer') {
-      fetchCartCount();
-    }
-  }, [role]);
-
-  const fetchCartCount = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      
-      const response = await fetch('http://localhost:8080/api/cart', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const count = data.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-        setCartCount(count);
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error);
-    }
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -91,28 +65,10 @@ export default function Navigation({ role = 'customer' }) {
                 href={item.path}
                 style={{
                   fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                  color: location.pathname === item.path ? '#0071e3' : '#000',
-                  position: 'relative',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  color: location.pathname === item.path ? '#0071e3' : '#000'
                 }}
               >
                 {item.label}
-                {item.label === 'Cart' && cartCount > 0 && (
-                  <span style={{
-                    backgroundColor: '#ff3b30',
-                    color: 'white',
-                    borderRadius: '10px',
-                    padding: '2px 6px',
-                    fontSize: '11px',
-                    fontWeight: 'bold',
-                    minWidth: '18px',
-                    textAlign: 'center'
-                  }}>
-                    {cartCount}
-                  </span>
-                )}
               </a>
             </li>
           ))}
