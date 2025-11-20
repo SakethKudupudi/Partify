@@ -54,22 +54,66 @@ Partify is a full-stack e-commerce platform that connects customers with phone p
 
 ```
 partify/
-├── backend/                    # Express API server
-│   ├── config/                 # Database & cloud configs
-│   ├── middleware/             # Auth & validation
-│   ├── routes/                 # API endpoints
-│   └── server.js               # Entry point
-├── unified-portal/             # Main React application
-│   └── src/
-│       ├── pages/
-│       │   ├── admin/          # Admin dashboard
-│       │   ├── vendor/         # Vendor dashboard
-│       │   └── customer/       # Customer storefront
-│       └── components/         # Shared components
-├── database/                   # SQL schemas & seeds
-├── terraform/                  # Infrastructure configs
-└── docs/                       # Documentation
+├── 📦 Source Code
+│   ├── backend/                    # Express API server
+│   │   ├── config/                 # Supabase, Redis, Azure configs
+│   │   ├── middleware/             # Authentication & validation
+│   │   ├── routes/                 # API endpoints (admin, vendor, customer)
+│   │   ├── services/               # Business logic (vector search, QA DB)
+│   │   └── server.js               # Express entry point
+│   ├── unified-portal/             # Main React portal (all roles)
+│   │   └── src/
+│   │       ├── pages/
+│   │       │   ├── admin/          # Admin dashboard & sales
+│   │       │   ├── vendor/         # Vendor inventory & requests
+│   │       │   └── customer/       # Customer storefront
+│   │       └── components/         # Shared UI components
+│   └── database/                   # Database schemas & seeds
+│
+├── 📚 Documentation (docs/)
+│   ├── ARCHITECTURE.md             # System design & data flow
+│   ├── AZURE_DEPLOYMENT.md         # Azure deployment guide
+│   ├── DEPLOYMENT.md               # Production deployment
+│   ├── DEVELOPMENT.md              # Development guide
+│   └── QUICKSTART.md               # Quick start guide
+│
+├── 🚀 Infrastructure (infra/)
+│   ├── bicep/                      # Azure IaC (Bicep)
+│   │   └── azure-deploy.bicep      # Complete infrastructure
+│   ├── docker/                     # Containerization
+│   │   ├── Dockerfile.backend      # Node.js container
+│   │   ├── Dockerfile.frontend     # React + Nginx container
+│   │   ├── docker-compose.yml      # Local multi-service setup
+│   │   └── nginx.conf              # Nginx reverse proxy
+│   └── terraform/                  # Infrastructure as Code
+│       ├── main.tf                 # Azure resources
+│       ├── variables.tf            # Variables & locals
+│       ├── outputs.tf              # Resource outputs
+│       └── deploy.sh               # Deployment script
+│
+├── 🔧 Configuration Files
+│   ├── .prettierrc                 # Code formatter config
+│   ├── .eslintrc.json              # Linter config
+│   ├── .gitignore                  # Git ignore rules
+│   └── .env.local                  # Environment variables (local only)
+│
+└── 📋 Root Documentation
+    ├── README.md                   # Project overview
+    ├── CONTRIBUTING.md             # Contributing guidelines
+    ├── LICENSE                     # MIT License
+    └── .github/workflows/          # CI/CD pipelines
+        └── azure-deploy.yml        # GitHub Actions workflow
 ```
+
+### Directory Purpose
+
+| Directory | Purpose |
+|-----------|---------|
+| `backend/` | Node.js/Express API server with routes, middleware, and business logic |
+| `unified-portal/` | React application serving admin, vendor, and customer interfaces |
+| `database/` | SQL schemas, migrations, and seed data |
+| `docs/` | Comprehensive documentation for all aspects |
+| `infra/` | Infrastructure-as-Code for Azure, Docker configs, and deployment automation |
 
 ## 🚦 Getting Started
 

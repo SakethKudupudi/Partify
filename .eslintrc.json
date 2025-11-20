@@ -1,0 +1,31 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true,
+    "browser": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "warn",
+    "prefer-const": "warn",
+    "eqeqeq": ["warn", "always"],
+    "no-var": "error",
+    "semi": ["error", "always"],
+    "quotes": ["warn", "single"]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.jsx", "**/*.js"],
+      "parserOptions": {
+        "ecmaFeatures": {
+          "jsx": true
+        }
+      }
+    }
+  ]
+}
